@@ -3,12 +3,13 @@ var deck = [];
 var players = []; 
 var table = [];
 var playersCombs = [];
+var dealtP = false;
 
 //Napravi špil
 for(var i=0; i<52; i++){
     deck.push(new Card(Math.floor(i/13), i%13));
 }
-shuffle();
+shuffleCards();
 
 //Napravi igrače
 for(var i=0; i<numP; i++){
@@ -22,6 +23,25 @@ dealP();
 flop();
 turn();
 river();
+
+function produceWinCards(){ //nadji karte u dobitnoj kombinaciji
+    var combs = getCombinations();
+    var winner = eval();
+    var winComb = [0,1,2,3,4,5,6];
+    var ex1 = 0;
+    var ex2 = 1;
+    for(var i=0; i<winner.combInd; i++){
+        if(ex2<6){
+            ex2++;
+        } else if (ex1!=5){
+            ex1++;
+            ex2=ex1+1;
+        }
+    }
+    winComb.splice(ex2, 1);
+    winComb.splice(ex1, 1);
+    return winComb;
+}
 
 function Card(suit,value){
     this.suit = suit;
@@ -86,7 +106,7 @@ function sortSuit(comb){
     return comb;
 }
 
-function shuffle(moves = 100) {
+function shuffleCards(moves = 100) {
     for(var i=0; i<moves; i++){
         var k1 = Math.floor(Math.random() * 52);
         var k2;
@@ -103,7 +123,47 @@ function dealP(){
     for(var i=0; i<numP; i++){
         players[i].hand.push(deck.pop());
         players[i].hand.push(deck.pop());
+        //DOM
+        var para = document.getElementById('players');
+        var pText = document.createElement('p');
+        pText.textContent = pText.textContent + 'Player ' + (i+1) + ' ';
+        for(var j=0; j<2; j++){
+            if(players[i].hand[j].value<9){
+                pText.textContent = pText.textContent + (players[i].hand[j].value+2);
+            } else{
+                switch(players[i].hand[j].value){
+                    case 9:
+                        pText.textContent = pText.textContent + 'J';
+                        break;
+                    case 10:
+                        pText.textContent = pText.textContent + 'Q';
+                        break;
+                    case 11:
+                        pText.textContent = pText.textContent + 'K';
+                        break;
+                    case 12:
+                        pText.textContent = pText.textContent + 'A';
+                        break;
+                }
+            }
+            switch(players[i].hand[j].suit){
+                case 0:
+                    pText.textContent = pText.textContent + '♠ ';
+                    break;
+                case 1:
+                    pText.textContent = pText.textContent + '♣ ';
+                    break;
+                case 2:
+                    pText.textContent = pText.textContent + '♥ ';
+                    break;
+                case 3:
+                    pText.textContent = pText.textContent + '♦ ';
+                    break;
+            }
+        }
+        para.appendChild(pText);
     }
+    dealtP = true;
 }
 
 function flop(){
@@ -139,7 +199,7 @@ function getCombinations(){
     playersCombs = [];
     var playersScores = [];
     for(var i=0; i<numP; i++){
-        set = [players[i].hand[0], players[i].hand[1], table[0], table[1], table[2], table[3], table[4]]; //Sastavljanje skupa 7 karata
+        comb7 = [players[i].hand[0], players[i].hand[1], table[0], table[1], table[2], table[3], table[4]]; //Sastavljanje skupa 7 karata
         combs = [];
         numCom = 0; //Broj kombinacija vec dodatih (od 21)
         ex1 = 0, ex2 = 1; //Karte koje se ne koriste u kombinaciji
@@ -149,7 +209,7 @@ function getCombinations(){
             comb = [];
             while(k<5){
                 if(j!=ex1 && j!=ex2){
-                    comb[k] = set[j];
+                    comb[k] = comb7[j];
                     k++;
                 }
                 j++;
